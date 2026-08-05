@@ -1,0 +1,4 @@
+dependencies:
+  dcoffey-lenox-laser/quadrature_encoder:
+    override_path: "../../../"
+    version: "*"

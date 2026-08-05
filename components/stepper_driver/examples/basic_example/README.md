@@ -1,5 +1,5 @@
 # Basic Example
-This example demonstrates how to use the stepper_driver directory.
+This example demonstrates how to use the stepper_driver component.
 
 It will energize the motor, rotate in both directions, then denergize the motor.
 

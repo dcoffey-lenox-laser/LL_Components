@@ -1,0 +1,20 @@
+menu "Quadrature Encoder"
+    config A_PIN
+        int "GPIO for A channel"
+        default 40
+        help 
+            GPIO number for the pin connected to the encoder's A channel
+    
+    config B_PIN
+        int "GPIO for B channel"
+        default 41
+        help
+            GPIO number for the pin connected to the encoder's B channel
+    
+    config Z_PIN
+        int "GPIO for Z channel"
+        default 42
+        help 
+            GPIO number for the pin connected to the encoder's Z channel
+
+endmenu
