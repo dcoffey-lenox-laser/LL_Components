@@ -1,0 +1,4 @@
+version: "0.0.1"
+description: Stepper motor driver for use with a step and direction stepper interface
+url: https://github.com/dcoffey-lenox-laser/LL_Components
+license: "MIT"
