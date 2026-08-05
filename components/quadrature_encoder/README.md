@@ -1,0 +1,1 @@
+Component for reading and interpreting a quadrature encoder
