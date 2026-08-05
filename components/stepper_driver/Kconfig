@@ -1,0 +1,46 @@
+menu "Stepper Driver"
+
+    config DIRECTION_PIN
+        int "Direction GPIO Number"
+        default 4 
+        help
+            GPIO number for the pin connected to driver direction pin.
+
+    config CLOCKWISE_LEVEL
+        int "Level of DIR pin for clockwise rotation"
+        range 0 1
+        default 1
+        help 
+            Level of the direction GPIO pin when steps will be done in a clockwise direction
+
+    config ENABLE_PIN
+        int "Enable GPIO Number"
+        default 5
+        help
+            GPIO number for the pin connected to the driver enable pin. 
+
+    config ENABLED_LEVEL
+        int "Level of EN pin when motor is energized"
+        range 0 1
+        default 1
+        help
+            Level of the enable GPIO pin when the motor is energized
+    
+    config  STEP_PIN
+        int "Step pin GPIO number"
+        default 6
+        help
+            GPIO number for the pin connected to the driver step pin
+           
+    config STEPS_PER_REV
+        int "Steps per revolution"
+        default 200
+        help
+            Number of steps in one rotation of the stepper motor. Not including microstepping
+    
+    config MICROSTEPS_PER_STEP
+        int "Microsteps per Step"
+        default 1
+        help
+            Number of microsteps per single step of the motor
+endmenu
