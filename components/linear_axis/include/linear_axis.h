@@ -24,6 +24,7 @@ typedef struct axis_config_t
 {
     stepper_driver_cfg_t *stepper_config;
     encoder_cfg_t *encoder_config;
+    bool enabled_encoder;
     axis_units_t axis_units;
     int minimum_position;           // in native steps
     int maximum_position;           // in native steps

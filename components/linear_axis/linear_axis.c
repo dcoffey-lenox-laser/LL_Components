@@ -142,8 +142,10 @@ esp_err_t linear_axis_new_axis(axis_cfg_t* axis_config, axis_t* axis_handle)
     gpio_isr_handler_add(axis_config->homeLimitPin, gpio_isr_handler, (void *)axis_config->homeLimitPin);
 
     ESP_ERROR_CHECK(StepperDriver_new_stepper_motor(axis_handle->stepper_motor, axis_config->stepper_config));
-    ESP_ERROR_CHECK(encoder_new_encoder(axis_handle->encoder, axis_config->encoder_config));
-
+    
+    if(axis_handle->axis_config->enabled_encoder){
+        ESP_ERROR_CHECK(encoder_new_encoder(axis_handle->encoder, axis_config->encoder_config));
+    }   
     linear_axis_set_position(axis_handle, 0);
     return ESP_OK;
 
@@ -159,14 +161,17 @@ esp_err_t linear_axis_move_rel(axis_t* axis_handle, double distance)
     int steps = get_motor_native_steps(axis_handle, distance);
     StepperDriver_move_num_steps(axis_handle->stepper_motor, steps);
 
-    if(feedback_task != NULL)
-    {
-        vTaskDelete(feedback_task);
-        feedback_task = NULL;
+    if(axis_handle->axis_config->enabled_encoder)
+    {   
+        if(feedback_task != NULL)
+        {
+            vTaskDelete(feedback_task);
+            feedback_task = NULL;
+        }
+        axis_ctx.axis =axis_handle;
+        axis_ctx.target = target;
+        xTaskCreate(&position_feedback_task, "position", 4096, &axis_ctx, 5, &feedback_task);
     }
-    axis_ctx.axis =axis_handle;
-    axis_ctx.target = target;
-    xTaskCreate(&position_feedback_task, "position", 4096, &axis_ctx, 5, &feedback_task);
     return ESP_OK;
 }
 
@@ -176,14 +181,17 @@ esp_err_t linear_axis_move_abs(axis_t* axis_handle, double position)
     double dist = position - pos;
     int steps = get_motor_native_steps(axis_handle, dist);
     StepperDriver_move_num_steps(axis_handle->stepper_motor, steps);
-    if(feedback_task != NULL)
-    {
-        vTaskDelete(feedback_task);
-        feedback_task = NULL;
+    if(axis_handle->axis_config->enabled_encoder)
+    {   
+        if(feedback_task != NULL)
+        {
+            vTaskDelete(feedback_task);
+            feedback_task = NULL;
+        }
+        axis_ctx.axis = axis_handle;
+        axis_ctx.target = position;
+        xTaskCreate(&position_feedback_task, "position", 4096, &axis_ctx, 5, &feedback_task);
     }
-    axis_ctx.axis = axis_handle;
-    axis_ctx.target = position;
-    xTaskCreate(&position_feedback_task, "position", 4096, &axis_ctx, 5, &feedback_task);
     return ESP_OK;
 }
 
@@ -242,8 +250,18 @@ esp_err_t linear_axis_set_position(axis_t* axis_handle, double position)
         ESP_LOGE(TAG, "No encoder provided");
         return ESP_ERR_INVALID_ARG;
     }
-    int pos = get_encoder_native_steps(axis_handle, position);
-    encoder_set_position(axis_handle->encoder, pos);
+    int pos;
+    if(axis_handle->axis_config->enabled_encoder)
+    {
+        pos = get_encoder_native_steps(axis_handle, position);
+        encoder_set_position(axis_handle->encoder, pos);
+    }
+    else 
+    {
+        pos = get_motor_native_steps(axis_handle, position);
+    }
+    axis_handle->position = pos;
+    
     return ESP_OK;
 }
 

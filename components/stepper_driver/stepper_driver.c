@@ -4,7 +4,7 @@ static const char* TAG = "Stepper Driver";
 static const int pcnt_high_limit = 32767;
 static const int pcnt_low_limit = -32768;
 
-int defualt_timer_resolution_hz = 10000000;
+int defualt_timer_resolution_hz = 100000;
 bool check_speed_valid(stepper_driver_cfg_t *config, int steps_per_sec);
 uint32_t get_speed_timer_period_ticks(stepper_motor_t *stepper_handle, double steps_per_sec);
 
@@ -18,6 +18,14 @@ static bool StepperDriver_stop_motion_callback(pcnt_unit_handle_t units, const p
     if(count >= stepper->travel_steps || ret != ESP_OK)
     {
         stepper->overflow_multiplier = 0;
+        if(stepper->Clockwise)
+        {
+            stepper->position += count;
+        }
+        else 
+        {
+            stepper->position -= count;
+        }
         StepperDriver_stop_motion(stepper);
     }
     else {
@@ -139,10 +147,12 @@ esp_err_t StepperDriver_start_motion(stepper_motor_t *stepper_handle, int direct
     if(direction <= 0)
     {
         gpio_set_level(stepper_handle->stepper_cfg->dir_pin, dir_val);
+        stepper_handle->Clockwise = false;
     }
     else
     {
         gpio_set_level(stepper_handle->stepper_cfg->dir_pin, !dir_val);
+        stepper_handle->Clockwise = true;
     }
     mcpwm_timer_start_stop(stepper_handle->timer, MCPWM_TIMER_START_NO_STOP);
         
@@ -159,7 +169,17 @@ esp_err_t StepperDriver_stop_motion(stepper_motor_t *stepper_handle)
     else {
         mcpwm_timer_start_stop(stepper_handle->timer, MCPWM_TIMER_STOP_FULL);
         esp_err_t ret = pcnt_unit_stop(stepper_handle->pcnt_unit);
-        
+       
+        if(ret == ESP_OK)
+        {
+            int val = pcnt_unit_get_count(stepper_handle->pcnt_unit, &val);
+            if(stepper_handle->Clockwise){
+                stepper_handle->position += val;
+            }
+            else {
+                stepper_handle->position -= val;
+            }
+        }
         if(ret == ESP_OK)
         {
             ret = pcnt_unit_clear_count(stepper_handle->pcnt_unit);
@@ -220,6 +240,37 @@ esp_err_t StepperDriver_set_speed(stepper_motor_t *stepper_handle, double steps_
         ret = mcpwm_timer_set_period(stepper_handle->timer, period_ticks);
     }
     return ret;
+}
+
+esp_err_t StepperDriver_set_position(stepper_motor_t *stepper_handle, int position)
+{
+    if(!stepper_handle)
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+    stepper_handle->position = position;
+    return ESP_OK;
+}
+
+int StepperDriver_get_position(stepper_motor_t *stepper_handle)
+{
+    if(!stepper_handle)
+    {
+        return ESP_ERR_INVALID_ARG;
+    }
+    int pos = stepper_handle->position;
+    if(stepper_handle->InMotion)
+    {
+        int val;
+        pcnt_unit_get_count(stepper_handle->pcnt_unit, &val);
+        if(stepper_handle->Clockwise){
+            pos += val;
+        }
+        else {
+            pos -= val;
+        }
+    }
+    return pos;
 }
 
 bool check_speed_valid(stepper_driver_cfg_t *config, int steps_per_sec)
