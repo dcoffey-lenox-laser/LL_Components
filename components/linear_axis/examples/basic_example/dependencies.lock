@@ -1,0 +1,36 @@
+dependencies:
+  dcoffey-lenox-laser/linear_axis:
+    dependencies:
+    - name: idf
+      version: '>=4.1.0'
+    - name: dcoffey-lenox-laser/quadrature_encoder
+      version: ^1.0.0
+    - name: dcoffey-lenox-laser/stepper_driver
+      version: ^1.0.0
+    source:
+      path: ../..
+      type: local
+    version: 1.0.0
+  dcoffey-lenox-laser/quadrature_encoder:
+    component_hash: a3b8ad210bbd6e763338768c42e52da350489d9a7423d50d7156c3fcbb4eabeb
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.0
+  dcoffey-lenox-laser/stepper_driver:
+    component_hash: e01b2abfa2ffbc53e08acc3bec3956f9306cd27b24760e3c2a4a7f43799e3c50
+    dependencies: []
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.0.0
+  idf:
+    source:
+      type: idf
+    version: 6.0.1
+direct_dependencies:
+- dcoffey-lenox-laser/linear_axis
+manifest_hash: 5c3698d262fff1997a36354cc2ae6fe0b5e3d8e73add7acbf5f5b4a52f9e7a28
+target: esp32s3
+version: 3.0.0

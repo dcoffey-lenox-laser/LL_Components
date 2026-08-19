@@ -3,6 +3,22 @@ dependencies:
     source:
       type: idf
     version: 6.0.1
-manifest_hash: 04cf63e15129d4ada9de08cc5e58200bcf3e5a69b2c23e4780ccd7432b244077
+  quadrature_encoder:
+    dependencies: []
+    source:
+      path: components/quadrature_encoder
+      type: local
+    version: 1.0.0
+  stepper_driver:
+    dependencies: []
+    source:
+      path: components/stepper_driver
+      type: local
+    version: 1.0.0
+direct_dependencies:
+- dcoffey-lenox-laser/quadrature_encoder
+- dcoffey-lenox-laser/stepper_driver
+- idf
+manifest_hash: 6d403bb80101029cd07090882cfa431d605ccafc67001fe551532c973507eafd
 target: esp32s3
 version: 3.0.0

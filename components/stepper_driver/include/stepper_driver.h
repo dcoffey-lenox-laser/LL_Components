@@ -27,6 +27,7 @@ typedef struct stepper_driver_config_t
 typedef struct stepper_motor_t
 {
     bool InMotion;
+    bool Clockwise;
     stepper_driver_cfg_t *stepper_cfg;
     mcpwm_timer_handle_t timer;
     mcpwm_oper_handle_t oper;
@@ -39,6 +40,7 @@ typedef struct stepper_motor_t
     double steps_per_second;
     int travel_steps;
     int overflow_multiplier;
+    int32_t position;
 } stepper_motor_t;
 
 esp_err_t StepperDriver_new_stepper_motor(stepper_motor_t *stepper_handle, stepper_driver_cfg_t *stepper_driver_cfg);
@@ -55,4 +57,7 @@ esp_err_t StepperDriver_disable(stepper_motor_t *stepper_handle);
 
 esp_err_t StepperDriver_set_speed(stepper_motor_t *stepper_handle, double steps_per_sec);
 
+esp_err_t StepperDriver_set_position(stepper_motor_t *stepper_handle, int position);
+
+int StepperDriver_get_position(stepper_motor_t *stepper_handle);
 #endif

@@ -1,0 +1,86 @@
+menu "Linear Axis"
+    
+    config ENABLE_HOME_LIMIT
+        bool "Is there a home limit on the axis"
+        default true
+   
+    if ENABLE_HOME_LIMIT
+        
+        config HOME_LIMIT_PIN
+            int "GPIO for home limit input pin"
+            default -1 if !ENABLE_HOME_LIMIT
+            default 46
+            help 
+                GPIO number for the pin connected to the home limit switch
+    
+    endif
+    
+    config ENABLE_AWAY_LIMIT
+        bool "Is there an away limit on the axis"
+        default true
+    
+    if ENABLE_AWAY_LIMIT
+        config AWAY_LIMIT_PIN
+            int "GPIO for await limit input pin"
+            default -1 if !ENABLE_AWAY_LIMIT
+            default 8
+            help
+                GPIO number for the pin connected to the away limit switch 
+    endif
+
+    config MINIMUM_POSITION
+        int "Lowest position the axis can reach in native steps"
+        default -2000
+        help 
+            Minimum position that the axis can reach assuming that home is at position 0.
+
+    config MAXIMUM_POSITION
+        int "Highest position the axis can reach in native steps"
+        default 10000000
+        help 
+            Maximum position that the axis can reach assuming that home is at position 0 and away is positive.
+
+    config UNITS_PER_REV
+        float "Units per revolution"
+        default 3200
+        help
+            Number of units the axis travels in one rotation of the motor
+    
+    choice AXIS_UNITS
+        prompt "Select the axis units"
+        default USE_NATIVE
+
+        config USE_NATIVE
+            bool "NATIVE UNITS"
+        config USE_MILLIMETERS
+            bool "MILLIMETERS"
+        config USE_INCHES
+            bool "INCHES"
+    endchoice
+
+    config AXIS_UNITS_VAL
+        int
+        default 0 if USE_NATIVE
+        default 1 if USE_MILLIMETERS
+        default 2 if USE_INCHES
+
+    config USE_ENCODER
+        bool "Is an encoder on this axis"
+        default true
+    
+    if USE_ENCODER
+        config ENCODER_STEPS_PER_UNITS
+            int "Steps on encoder after 1 unit of travel"
+            default 1
+            help 
+                The number of steps the encoder will travel if the axis moves 1 unit
+        
+        config MAXIMUM_ERROR
+            float "Maximum error in selected units"
+            default "1"
+    endif
+
+    
+
+
+endmenu

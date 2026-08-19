@@ -1,0 +1,4 @@
+dependencies:
+  dcoffey-lenox-laser/linear_axis:
+    override_path: "../../../"
+    version: "*"
