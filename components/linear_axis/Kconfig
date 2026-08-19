@@ -1,16 +1,33 @@
 menu "Linear Axis"
-    config HOME_LIMIT_PIN
-        int "GPIO for home limit input pin"
-        default 46
-        help 
-            GPIO number for the pin connected to the home limit switch
     
-    config AWAY_LIMIT_PIN
-        int "GPIO for await limit input pin"
-        default 8
-        help
-            GPIO number for the pin connected to the away limit switch 
+    config ENABLE_HOME_LIMIT
+        bool "Is there a home limit on the axis"
+        default true
+   
+    if ENABLE_HOME_LIMIT
+        
+        config HOME_LIMIT_PIN
+            int "GPIO for home limit input pin"
+            default -1 if !ENABLE_HOME_LIMIT
+            default 46
+            help 
+                GPIO number for the pin connected to the home limit switch
     
+    endif
+    
+    config ENABLE_AWAY_LIMIT
+        bool "Is there an away limit on the axis"
+        default true
+    
+    if ENABLE_AWAY_LIMIT
+        config AWAY_LIMIT_PIN
+            int "GPIO for await limit input pin"
+            default -1 if !ENABLE_AWAY_LIMIT
+            default 8
+            help
+                GPIO number for the pin connected to the away limit switch 
+    endif
+
     config MINIMUM_POSITION
         int "Lowest position the axis can reach in native steps"
         default -2000

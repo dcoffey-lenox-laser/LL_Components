@@ -118,7 +118,6 @@ esp_err_t StepperDriver_move_num_steps(stepper_motor_t *stepper_handle, int num_
         ESP_LOGI(TAG, "Stepper already in motion.");
     }
 
-    ESP_ERROR_CHECK(pcnt_unit_start(stepper_handle->pcnt_unit));
 
     stepper_handle->travel_steps = abs(num_steps);
     int watchpoint_value = stepper_handle->travel_steps % pcnt_high_limit;
@@ -154,6 +153,7 @@ esp_err_t StepperDriver_start_motion(stepper_motor_t *stepper_handle, int direct
         gpio_set_level(stepper_handle->stepper_cfg->dir_pin, !dir_val);
         stepper_handle->Clockwise = true;
     }
+    ESP_ERROR_CHECK(pcnt_unit_start(stepper_handle->pcnt_unit));
     mcpwm_timer_start_stop(stepper_handle->timer, MCPWM_TIMER_START_NO_STOP);
         
     stepper_handle->InMotion = true;

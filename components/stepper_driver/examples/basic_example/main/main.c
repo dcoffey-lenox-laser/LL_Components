@@ -72,7 +72,7 @@ void app_main()
     StepperDriver_set_speed(&stepper_motor, 3200);
     vTaskDelay(1000/portTICK_PERIOD_MS);
     ESP_LOGI(TAG, "Moving Clockwise 6400 steps");
-    StepperDriver_move_num_steps(&stepper_motor, 6400);
+    StepperDriver_move_num_steps(&stepper_motor, 3200);
     vTaskDelay(10/portTICK_PERIOD_MS);
     while(stepper_motor.InMotion)
     {
@@ -102,6 +102,11 @@ void app_main()
     }
     ESP_LOGI(TAG, "Position: %d reached", StepperDriver_get_position(&stepper_motor));
 
+    ESP_LOGI(TAG, "Moving clockwise for 2 seconds");
+    StepperDriver_start_motion(&stepper_motor, 1);
+    vTaskDelay(3000 / portTICK_PERIOD_MS);
+    ESP_LOGI(TAG, "Position: %d reached", StepperDriver_get_position(&stepper_motor));
+    StepperDriver_stop_motion(&stepper_motor);
     StepperDriver_disable(&stepper_motor);
     ESP_LOGI(TAG, "Motor denergized");
 

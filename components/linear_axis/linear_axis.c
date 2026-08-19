@@ -3,6 +3,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
+#include "sdkconfig.h"
 #include "esp_timer.h"
 #include <math.h>
 
@@ -136,11 +137,20 @@ esp_err_t linear_axis_new_axis(axis_cfg_t* axis_config, axis_t* axis_handle)
     gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
     xTaskCreate(gpio_task, "gpio_task", 2048, axis_handle, 10, NULL);
 
-    gpio_install_isr_service(0);
+    if(axis_config->awayLimitPin != -1 || axis_config->homeLimitPin != -1)
+    {
+        gpio_install_isr_service(0);
+    }
     // hook isr handler for specific gpio pin
-    gpio_isr_handler_add(axis_config->awayLimitPin, gpio_isr_handler, (void *)axis_config->awayLimitPin);
-    gpio_isr_handler_add(axis_config->homeLimitPin, gpio_isr_handler, (void *)axis_config->homeLimitPin);
+    if(axis_config->awayLimitPin != -1)
+    {
+        gpio_isr_handler_add(axis_config->awayLimitPin, gpio_isr_handler, (void *)axis_config->awayLimitPin);
+    }
 
+    if(axis_config->homeLimitPin != -1)
+    {
+        gpio_isr_handler_add(axis_config->homeLimitPin, gpio_isr_handler, (void *)axis_config->homeLimitPin);
+    }
     ESP_ERROR_CHECK(StepperDriver_new_stepper_motor(axis_handle->stepper_motor, axis_config->stepper_config));
     
     if(axis_handle->axis_config->enabled_encoder){
