@@ -31,11 +31,11 @@ axis_cfg_t axis_config = {
     .minimum_position = -1000000,
     .maximum_position = 100000000,
     .units_per_revolution = 3200,
-    .encoder_steps_per_unit = CONFIG_ENCODER_STEPS,
+    .encoder_steps_per_unit = CONFIG_ENCODER_STEPS_PER_UNIT,
     .maximum_error = 5,
-    .homeLimitPin = CONFIG_HOME_LIMIT_PIN,
+    .homeLimitPin = 8,
     .axis_units = Millimeters,
-    .awayLimitPin = CONFIG_AWAY_LIMIT_PIN,
+    .awayLimitPin = 46
 };
 
 stepper_motor_t stepper_motor = {

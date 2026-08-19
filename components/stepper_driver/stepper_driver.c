@@ -50,6 +50,7 @@ esp_err_t StepperDriver_new_stepper_motor(stepper_motor_t *stepper_handle, stepp
 
     gpio_set_direction(stepper_driver_cfg->en_pin, GPIO_MODE_OUTPUT);
     gpio_set_direction(stepper_driver_cfg->dir_pin, GPIO_MODE_OUTPUT);
+    gpio_set_direction(stepper_driver_cfg->step_pin, GPIO_MODE_OUTPUT);
 
     mcpwm_timer_config_t timer_cfg = {
         .group_id = 0,
