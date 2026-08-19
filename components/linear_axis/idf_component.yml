@@ -19,4 +19,4 @@ dependencies:
   #   # All dependencies of `main` are public by default.
   #   public: true
   dcoffey-lenox-laser/quadrature_encoder: ^1.0.0
-  dcoffey-lenox-laser/stepper_driver: ^1.0.1
+  dcoffey-lenox-laser/stepper_driver: ^1.0.2
