@@ -14,11 +14,11 @@ dependencies:
     source:
       path: components/stepper_driver
       type: local
-    version: 1.0.1
+    version: 1.0.2
 direct_dependencies:
 - dcoffey-lenox-laser/quadrature_encoder
 - dcoffey-lenox-laser/stepper_driver
 - idf
-manifest_hash: 87a18a37a75d2321f2cdbc7bce532b4a9a3433ed8832206be1b4598330ae8ce1
+manifest_hash: 0ece72b15fb819423d3c6ec67430f35f23fce1f7630174fb1ca94751ad2d2cb4
 target: esp32s3
 version: 3.0.0

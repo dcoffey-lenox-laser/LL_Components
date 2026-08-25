@@ -44,7 +44,7 @@ static void gpio_task(void *arg)
             }
             else if(io_num == axis->axis_config->homeLimitPin)
             {
-                printf("\nHome limit pin level: %d", gpio_get_level(axis->axis_config->homeLimitPin));
+                printf("\nHome limit hit");
                 if(axis->stepper_motor->InMotion)
                 {
                     StepperDriver_stop_motion(axis->stepper_motor);
@@ -54,7 +54,6 @@ static void gpio_task(void *arg)
         fflush(stdout);
     }
 }
-
 
 int get_motor_native_steps(axis_t* axis_handle, double value)
 {
@@ -191,6 +190,7 @@ esp_err_t linear_axis_move_abs(axis_t* axis_handle, double position)
     double dist = position - pos;
     int steps = get_motor_native_steps(axis_handle, dist);
     StepperDriver_move_num_steps(axis_handle->stepper_motor, steps);
+    ESP_LOGI(TAG, "Moving %d steps", steps);
     if(axis_handle->axis_config->enabled_encoder)
     {   
         if(feedback_task != NULL)
@@ -255,11 +255,7 @@ esp_err_t linear_axis_set_position(axis_t* axis_handle, double position)
         return ESP_ERR_INVALID_ARG;
     }
     
-    if(axis_handle->encoder == NULL)
-    {
-        ESP_LOGE(TAG, "No encoder provided");
-        return ESP_ERR_INVALID_ARG;
-    }
+    
     int pos;
     if(axis_handle->axis_config->enabled_encoder)
     {
@@ -279,7 +275,14 @@ esp_err_t linear_axis_set_relative_zero(axis_t* axis_handle)
 {
     assert(axis_handle);
     double steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
-    double pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    double pos;
+    if(axis_handle->axis_config->enabled_encoder){
+        pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    }
+    else {
+        steps_per_unit = axis_handle->stepper_motor->stepper_cfg->steps_per_rev / axis_handle->axis_config->units_per_revolution;
+        pos = StepperDriver_get_position(axis_handle->stepper_motor) / steps_per_unit;
+    }
     axis_handle->posOffset = pos;
     axis_handle->position = 0;
     return ESP_OK;
@@ -318,14 +321,17 @@ double linear_axis_get_global_position(axis_t* axis_handle)
         ESP_LOGE(TAG, "No axis_handle provided");
         return ESP_ERR_INVALID_ARG;
     }
-    if(axis_handle->encoder == NULL)
-    {
-        ESP_LOGE(TAG, "No encoder provided");
-        return ESP_ERR_INVALID_ARG;
-    }
 
-    double steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
-    double pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    double steps_per_unit;
+    double pos;
+    if(axis_handle->axis_config->enabled_encoder){
+        steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
+        pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    }
+    else {
+        steps_per_unit = axis_handle->axis_config->stepper_config->steps_per_rev / axis_handle->axis_config->units_per_revolution;
+        pos = StepperDriver_get_position(axis_handle->stepper_motor) / steps_per_unit;
+    }
     return pos;
 }
 
@@ -336,14 +342,16 @@ double linear_axis_get_relative_position(axis_t* axis_handle)
         ESP_LOGE(TAG, "No axis_handle provided");
         return ESP_ERR_INVALID_ARG;
     }
-    if(axis_handle->encoder == NULL)
-    {
-        ESP_LOGE(TAG, "No encoder provided");
-        return ESP_ERR_INVALID_ARG;
+   
+    double pos;
+    if(axis_handle->axis_config->enabled_encoder){
+        double steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
+        pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
     }
-
-    double steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
-    double pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    else {
+        double steps_per_unit = axis_handle->axis_config->stepper_config->steps_per_rev * axis_handle->axis_config->stepper_config->microstep_count / axis_handle->axis_config->units_per_revolution;
+        pos = StepperDriver_get_position(axis_handle->stepper_motor) / steps_per_unit;
+    }
     pos = pos - axis_handle->posOffset;
     return pos;
 }

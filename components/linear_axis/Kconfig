@@ -37,13 +37,26 @@ menu "Linear Axis"
         default 10000000
         help 
             Maximum position that the axis can reach assuming that home is at position 0 and away is positive.
-
+    
+    config USE_ENCODER
+        bool "Is an encoder on this axis"
+        default y
+        help 
+            Is there an encoder included on this axis
+    
+    config ENCODER_STEPS_PER_UNIT
+        int "Steps on encoder after 1 unit of travel"
+        depends on USE_ENCODER
+        default 1
+        help 
+            The number of steps the encoder will travel if the axis moves 1 unit
+       
     config UNITS_PER_REV
         float "Units per revolution"
         default 3200
         help
             Number of units the axis travels in one rotation of the motor
-    
+            
     choice AXIS_UNITS
         prompt "Select the axis units"
         default USE_NATIVE
@@ -57,26 +70,16 @@ menu "Linear Axis"
     endchoice
 
     config AXIS_UNITS_VAL
-        int
+        int "units enum value"
         default 0 if USE_NATIVE
         default 1 if USE_MILLIMETERS
         default 2 if USE_INCHES
+        help
+            Which units will the axis be using
 
-    config USE_ENCODER
-        bool "Is an encoder on this axis"
-        default y
-        help 
-            Is there an encoder included on this axis
     
-    config ENCODER_STEPS_PER_UNIT
-        int "Steps on encoder after 1 unit of travel"
-        depends on USE_ENCODER
-        default 1
-        help 
-            The number of steps the encoder will travel if the axis moves 1 unit
-        
-        config MAXIMUM_ERROR
-            float "Maximum error in selected units"
-            default "1"
+    config MAXIMUM_ERROR
+        float "Maximum error in selected units"
+        default "1"
 
 endmenu
