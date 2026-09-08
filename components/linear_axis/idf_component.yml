@@ -1,4 +1,4 @@
-version: "1.0.0"
+version: "1.0.1"
 description: Linear axis controller component
 url: https://github.com/dcoffey-lenox-laser/LL_Components
 liscense: "MIT"
@@ -19,4 +19,4 @@ dependencies:
   #   # All dependencies of `main` are public by default.
   #   public: true
   dcoffey-lenox-laser/quadrature_encoder: ^1.0.0
-  dcoffey-lenox-laser/stepper_driver: ^1.0.1
+  dcoffey-lenox-laser/stepper_driver: ^1.0.2

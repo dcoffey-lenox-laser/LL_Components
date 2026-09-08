@@ -2,4 +2,3 @@ dependencies:
   dcoffey-lenox-laser/linear_axis:
     override_path: ../../../
     version: '*'
-  dcoffey-lenox-laser/stepper_driver: ^1.0.1

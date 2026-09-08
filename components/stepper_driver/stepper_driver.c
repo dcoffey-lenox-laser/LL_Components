@@ -238,7 +238,12 @@ esp_err_t StepperDriver_set_speed(stepper_motor_t *stepper_handle, double steps_
     if(speed_valid)
     {
         int period_ticks = get_speed_timer_period_ticks(stepper_handle, steps_per_sec);
+        stepper_handle->steps_per_second = steps_per_sec;
         ret = mcpwm_timer_set_period(stepper_handle->timer, period_ticks);
+        ESP_LOGI(TAG, "Steps per second %f", stepper_handle->steps_per_second);
+    }
+    else {
+        ESP_LOGI(TAG, "Speed not valid");
     }
     return ret;
 }

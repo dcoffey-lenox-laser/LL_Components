@@ -29,6 +29,7 @@ stepper_motor_t stepper_motor = {
 void app_main()
 {
     ESP_LOGI(TAG, "*** Start Example ***");
+    ESP_LOGI(TAG, "Pulse pin %d", CONFIG_STEP_PIN);
     int loop_count = 0;
     int position_out_count = 10;
     ESP_ERROR_CHECK(StepperDriver_new_stepper_motor(&stepper_motor, &stepper_config));

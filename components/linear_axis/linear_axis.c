@@ -39,22 +39,23 @@ static void gpio_task(void *arg)
                 printf("\nAway Limit hit");
                 if(axis->stepper_motor->InMotion)
                 {
-                    StepperDriver_stop_motion(axis->stepper_motor);
+                    linear_axis_stop(axis);
+                    linear_axis_disable(axis);
                 }
             }
             else if(io_num == axis->axis_config->homeLimitPin)
             {
-                printf("\nHome limit pin level: %d", gpio_get_level(axis->axis_config->homeLimitPin));
+                printf("\nHome limit hit");
                 if(axis->stepper_motor->InMotion)
                 {
-                    StepperDriver_stop_motion(axis->stepper_motor);
+                    linear_axis_stop(axis);
+                    linear_axis_disable(axis);
                 }
             }
         }
         fflush(stdout);
     }
 }
-
 
 int get_motor_native_steps(axis_t* axis_handle, double value)
 {
@@ -205,6 +206,17 @@ esp_err_t linear_axis_move_abs(axis_t* axis_handle, double position)
     return ESP_OK;
 }
 
+esp_err_t linear_axis_move_dir(axis_t* axis_handle, int dir)
+{
+    if(feedback_task != NULL)
+    {
+        vTaskDelete(feedback_task);
+        feedback_task = NULL;
+    }
+    StepperDriver_start_motion(axis_handle->stepper_motor, dir);
+    return ESP_OK;
+}
+
 esp_err_t linear_axis_enable(axis_t* axis_handle)
 {
     if(axis_handle == NULL)
@@ -244,6 +256,9 @@ esp_err_t linear_axis_disable(axis_t* axis_handle)
 //TODO: implement this method
 esp_err_t linear_axis_set_speed(axis_t* axis_handle, double units_per_sec)
 {
+    double steps_per_sec = units_per_sec * axis_handle->axis_config->stepper_config->steps_per_rev  * axis_handle->axis_config->stepper_config->microstep_count / axis_handle->axis_config->units_per_revolution;
+    ESP_LOGI(TAG, "Steps_per_sec %f",steps_per_sec);
+    StepperDriver_set_speed(axis_handle->stepper_motor, steps_per_sec);
     return ESP_OK;
 }
 
@@ -255,11 +270,7 @@ esp_err_t linear_axis_set_position(axis_t* axis_handle, double position)
         return ESP_ERR_INVALID_ARG;
     }
     
-    if(axis_handle->encoder == NULL)
-    {
-        ESP_LOGE(TAG, "No encoder provided");
-        return ESP_ERR_INVALID_ARG;
-    }
+    
     int pos;
     if(axis_handle->axis_config->enabled_encoder)
     {
@@ -279,29 +290,31 @@ esp_err_t linear_axis_set_relative_zero(axis_t* axis_handle)
 {
     assert(axis_handle);
     double steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
-    double pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    double pos;
+    if(axis_handle->axis_config->enabled_encoder){
+        pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    }
+    else {
+        steps_per_unit = axis_handle->stepper_motor->stepper_cfg->steps_per_rev / axis_handle->axis_config->units_per_revolution;
+        pos = StepperDriver_get_position(axis_handle->stepper_motor) / steps_per_unit;
+    }
     axis_handle->posOffset = pos;
     axis_handle->position = 0;
     return ESP_OK;
 }
 
-esp_err_t linear_axis_stop_motion(axis_t* axis_handle)
+esp_err_t linear_axis_stop(axis_t* axis_handle)
 {
     assert(axis_handle);
     if(feedback_task != NULL)
     {
         vTaskDelete(feedback_task);
+        feedback_task = NULL;
     }
     if(axis_handle->stepper_motor->InMotion)
     {
         StepperDriver_stop_motion(axis_handle->stepper_motor);
     }
-    return ESP_OK;
-}
-
-//TODO implment this function
-esp_err_t linear_axis_configure(axis_cfg_t* axis_config, axis_t* axis_handle)
-{
     return ESP_OK;
 }
 
@@ -318,14 +331,17 @@ double linear_axis_get_global_position(axis_t* axis_handle)
         ESP_LOGE(TAG, "No axis_handle provided");
         return ESP_ERR_INVALID_ARG;
     }
-    if(axis_handle->encoder == NULL)
-    {
-        ESP_LOGE(TAG, "No encoder provided");
-        return ESP_ERR_INVALID_ARG;
-    }
 
-    double steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
-    double pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    double steps_per_unit;
+    double pos;
+    if(axis_handle->axis_config->enabled_encoder){
+        steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
+        pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    }
+    else {
+        steps_per_unit = axis_handle->axis_config->stepper_config->steps_per_rev / axis_handle->axis_config->units_per_revolution;
+        pos = StepperDriver_get_position(axis_handle->stepper_motor) / steps_per_unit;
+    }
     return pos;
 }
 
@@ -336,14 +352,16 @@ double linear_axis_get_relative_position(axis_t* axis_handle)
         ESP_LOGE(TAG, "No axis_handle provided");
         return ESP_ERR_INVALID_ARG;
     }
-    if(axis_handle->encoder == NULL)
-    {
-        ESP_LOGE(TAG, "No encoder provided");
-        return ESP_ERR_INVALID_ARG;
+   
+    double pos;
+    if(axis_handle->axis_config->enabled_encoder){
+        double steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
+        pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
     }
-
-    double steps_per_unit = axis_handle->axis_config->encoder_steps_per_unit;
-    double pos = encoder_get_position(axis_handle->encoder) / steps_per_unit;
+    else {
+        double steps_per_unit = axis_handle->axis_config->stepper_config->steps_per_rev * axis_handle->axis_config->stepper_config->microstep_count / axis_handle->axis_config->units_per_revolution;
+        pos = StepperDriver_get_position(axis_handle->stepper_motor) / steps_per_unit;
+    }
     pos = pos - axis_handle->posOffset;
     return pos;
 }
