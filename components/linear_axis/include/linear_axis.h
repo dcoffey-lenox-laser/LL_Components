@@ -52,12 +52,13 @@ typedef struct axis_t
 esp_err_t linear_axis_new_axis(axis_cfg_t* axis_config, axis_t* axis_handle);
 esp_err_t linear_axis_move_rel(axis_t* axis_handle, double distance);
 esp_err_t linear_axis_move_abs(axis_t* axis_handle, double position);
+esp_err_t linear_axis_move_dir(axis_t* axis_handle, int dir);
 esp_err_t linear_axis_enable(axis_t* axis_handle);
 esp_err_t linear_axis_disable(axis_t* axis_handle);
+esp_err_t linear_axis_stop(axis_t* axis_handle);
 esp_err_t linear_axis_set_speed(axis_t* axis_handle, double units_per_sec);
 esp_err_t linear_axis_set_position(axis_t* axis_handle, double position);
 esp_err_t linear_axis_set_relative_zero(axis_t* axis_handle);
-esp_err_t linear_axis_configure(axis_cfg_t* axis_config, axis_t* axis_handle);
 
 bool linear_axis_get_motion_status(axis_t* axis_handle);
 double linear_axis_get_global_position(axis_t* axis_handle);

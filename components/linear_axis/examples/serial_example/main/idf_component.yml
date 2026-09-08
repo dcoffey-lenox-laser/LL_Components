@@ -1,0 +1,10 @@
+dependencies:
+  dcoffey-lenox-laser/linear_axis:
+    override_path: ../../../
+    version: '*'
+  dcoffey-lenox-laser/stepper_driver:
+    override_path: ../../../../stepper_driver
+    version: '*'
+  dcoffey-lenox-laser/quadrature_encoder:
+    override_path: ../../../../quadrature_encoder
+    version: '*'

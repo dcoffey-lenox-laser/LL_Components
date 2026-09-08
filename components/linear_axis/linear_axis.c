@@ -39,7 +39,8 @@ static void gpio_task(void *arg)
                 printf("\nAway Limit hit");
                 if(axis->stepper_motor->InMotion)
                 {
-                    StepperDriver_stop_motion(axis->stepper_motor);
+                    linear_axis_stop(axis);
+                    linear_axis_disable(axis);
                 }
             }
             else if(io_num == axis->axis_config->homeLimitPin)
@@ -47,7 +48,8 @@ static void gpio_task(void *arg)
                 printf("\nHome limit hit");
                 if(axis->stepper_motor->InMotion)
                 {
-                    StepperDriver_stop_motion(axis->stepper_motor);
+                    linear_axis_stop(axis);
+                    linear_axis_disable(axis);
                 }
             }
         }
@@ -190,7 +192,6 @@ esp_err_t linear_axis_move_abs(axis_t* axis_handle, double position)
     double dist = position - pos;
     int steps = get_motor_native_steps(axis_handle, dist);
     StepperDriver_move_num_steps(axis_handle->stepper_motor, steps);
-    ESP_LOGI(TAG, "Moving %d steps", steps);
     if(axis_handle->axis_config->enabled_encoder)
     {   
         if(feedback_task != NULL)
@@ -202,6 +203,17 @@ esp_err_t linear_axis_move_abs(axis_t* axis_handle, double position)
         axis_ctx.target = position;
         xTaskCreate(&position_feedback_task, "position", 4096, &axis_ctx, 5, &feedback_task);
     }
+    return ESP_OK;
+}
+
+esp_err_t linear_axis_move_dir(axis_t* axis_handle, int dir)
+{
+    if(feedback_task != NULL)
+    {
+        vTaskDelete(feedback_task);
+        feedback_task = NULL;
+    }
+    StepperDriver_start_motion(axis_handle->stepper_motor, dir);
     return ESP_OK;
 }
 
@@ -244,6 +256,9 @@ esp_err_t linear_axis_disable(axis_t* axis_handle)
 //TODO: implement this method
 esp_err_t linear_axis_set_speed(axis_t* axis_handle, double units_per_sec)
 {
+    double steps_per_sec = units_per_sec * axis_handle->axis_config->stepper_config->steps_per_rev  * axis_handle->axis_config->stepper_config->microstep_count / axis_handle->axis_config->units_per_revolution;
+    ESP_LOGI(TAG, "Steps_per_sec %f",steps_per_sec);
+    StepperDriver_set_speed(axis_handle->stepper_motor, steps_per_sec);
     return ESP_OK;
 }
 
@@ -288,23 +303,18 @@ esp_err_t linear_axis_set_relative_zero(axis_t* axis_handle)
     return ESP_OK;
 }
 
-esp_err_t linear_axis_stop_motion(axis_t* axis_handle)
+esp_err_t linear_axis_stop(axis_t* axis_handle)
 {
     assert(axis_handle);
     if(feedback_task != NULL)
     {
         vTaskDelete(feedback_task);
+        feedback_task = NULL;
     }
     if(axis_handle->stepper_motor->InMotion)
     {
         StepperDriver_stop_motion(axis_handle->stepper_motor);
     }
-    return ESP_OK;
-}
-
-//TODO implment this function
-esp_err_t linear_axis_configure(axis_cfg_t* axis_config, axis_t* axis_handle)
-{
     return ESP_OK;
 }
 
