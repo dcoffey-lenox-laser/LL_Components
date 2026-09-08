@@ -15,5 +15,6 @@ jobs:
           components: |
             components/stepper_driver
             components/quadrature_encoder
+            components/linear_axis
           namespace: "dcoffey-lenox-laser"
           api_token: ${{secrets.IDF_COMPONENT_API_TOKEN}}
