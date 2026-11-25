@@ -1,0 +1,4 @@
+dependencies:
+  dcoffey-lenox-laser/stepper_driver:
+    override_path: "../../../"
+    version: "*"

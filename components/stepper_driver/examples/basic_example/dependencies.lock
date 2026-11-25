@@ -4,11 +4,11 @@ dependencies:
     source:
       path: ../..
       type: local
-    version: 1.0.2
+    version: 1.0.3
   idf:
     source:
       type: idf
-    version: 6.0.1
+    version: 6.0.3
 direct_dependencies:
 - dcoffey-lenox-laser/stepper_driver
 manifest_hash: 62140ca1e46815f90434baf5c7b4a8be456c3db736ecef8db4cfc91777163c3f

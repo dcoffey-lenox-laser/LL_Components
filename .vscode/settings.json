@@ -5,7 +5,7 @@
     "board/esp32s3-builtin.cfg"
   ],
   "idf.portWin": "COM8",
-  "idf.currentSetup": "C:\\esp\\v6.0.1\\esp-idf",
+  "idf.currentSetup": "C:\\esp\\v6.0.3\\esp-idf",
   "idf.customExtraVars": {
     "IDF_TARGET": "esp32s3"
   },
@@ -15,5 +15,6 @@
     "--query-driver=**",
     "--compile-commands-dir=c:\\Users\\dcoffey\\Documents\\LL_Components\\build"
   ],
-  "idf.flashType": "UART"
+  "idf.flashType": "UART",
+  "idf.port": "COM28"
 }
